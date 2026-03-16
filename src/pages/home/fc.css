@@ -1,0 +1,21 @@
+#calendar {
+  height: 600px;
+}
+.category-department {
+  background-color: var(--brand-calendar-department-bg, rgb(248, 157, 157));
+}
+.category-department:hover {
+  background-color: var(--brand-calendar-department-hover, rgb(252, 176, 176));
+}
+.category-class {
+  background-color: var(--brand-calendar-class-bg, rgb(190, 248, 157));
+}
+.category-class:hover {
+  background-color: var(--brand-calendar-class-hover, rgb(204, 250, 177));
+}
+.category-general {
+  background-color: var(--brand-calendar-general-bg, rgb(157, 195, 248));
+}
+.category-general:hover {
+  background-color: var(--brand-calendar-general-hover, rgb(138, 182, 245));
+}
