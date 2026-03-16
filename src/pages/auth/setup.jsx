@@ -9,7 +9,7 @@ import {
   IconButton,
   Avatar,
 } from "@mui/joy";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore, useSnackStore } from "../../store";
 import fetchService from "../../component/fetch";
 import { useMutation } from "@tanstack/react-query";

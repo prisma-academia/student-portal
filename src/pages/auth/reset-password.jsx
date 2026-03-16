@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/joy";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSnackStore } from "../../store";
 import fetchService from "../../component/fetch";

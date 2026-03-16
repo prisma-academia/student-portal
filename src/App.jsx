@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import Loading from "./component/loading";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSnackStore, useErrorModalStore } from "./store";
-import AIChatInterface from "./component/aiChat/AIChatInterface";
 import ErrorModal from "./component/ErrorModal";
 import AppErrorBoundary from "./component/AppErrorBoundary";
 
@@ -67,7 +66,6 @@ function App() {
         <ErrorModal />
         <Loading />
         <RouterProvider router={router} />
-        <AIChatInterface />
       </AppErrorBoundary>
     </QueryClientProvider>
   );

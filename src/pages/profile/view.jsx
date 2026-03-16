@@ -14,7 +14,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/joy";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore, useSnackStore } from "../../store";
 import fetchService from "../../component/fetch";
 import configs from "../../configs";
@@ -185,7 +185,7 @@ function Profile() {
                 }
               />
             </Stack>
-          </Stack>
+          </Box>
           <FormControl>
             <FormLabel>Date of birth</FormLabel>
             <Input

@@ -8,7 +8,6 @@ import {
     Stack,
     Typography,
   } from "@mui/joy";
-  import React from "react";
   import { useSnackStore } from "../../store";
   import fetchService from "../../component/fetch";
   import { useMutation } from "@tanstack/react-query";
