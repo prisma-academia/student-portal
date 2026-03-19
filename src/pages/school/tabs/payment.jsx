@@ -176,7 +176,7 @@ function FeeDetailsModal({ open, fee, onClose, onPay, onReceipt, isPaying }) {
               variant="solid"
               color="neutral"
               onClick={onReceipt}
-              disabled={!fee?.userPayment?._id}
+              disabled={!((fee?.userPayment ?? fee?.studentPayment)?._id)}
             >
               Receipt
             </Button>
@@ -311,8 +311,8 @@ export default function Payment() {
   const fees = Array.isArray(data?.data) ? data.data : [];
 
   const receiptUrl =
-    activeFee?.userPayment?._id && token
-      ? `${configs.baseUrl}/api/v1/payment/receipt/${activeFee.userPayment._id}?token=${token}`
+    (activeFee?.userPayment?._id ?? activeFee?.studentPayment?._id) && token
+      ? `${configs.baseUrl}/api/v1/payment/receipt/${activeFee.userPayment?._id ?? activeFee.studentPayment._id}?token=${token}`
       : null;
 
   return (
