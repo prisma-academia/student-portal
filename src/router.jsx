@@ -1,4 +1,3 @@
-import * as React from "react";
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { lazy } from "react";
 import AuthLayout from "./layout/auth";
@@ -48,7 +47,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <DashboardLayout children={<Outlet />} />,
+    element: (
+      <DashboardLayout>
+        <Outlet />
+      </DashboardLayout>
+    ),
     errorElement: <RouteErrorFallback />,
     children: [
       {

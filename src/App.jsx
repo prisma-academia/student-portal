@@ -60,9 +60,10 @@ function App() {
           anchorOrigin={{ horizontal: "center", vertical: "top" }}
           variant="soft"
           color={variant}
-          open={message ? true : false}
-          children={message}
-        />
+          open={Boolean(message)}
+        >
+          {message}
+        </Snackbar>
         <ErrorModal />
         <Loading />
         <RouterProvider router={router} />

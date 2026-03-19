@@ -1,13 +1,8 @@
 import * as React from "react";
-import PropTypes from "prop-types";
-import IconButton from "@mui/joy/IconButton";
 import Table from "@mui/joy/Table";
 import Typography from "@mui/joy/Typography";
-import Sheet from "@mui/joy/Sheet";
 import Stack from "@mui/joy/Stack";
 import Chip from "@mui/joy/Chip";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -17,235 +12,264 @@ import { useAuthStore } from "../../../store";
 import configs from "../../../configs";
 import Box from "@mui/joy/Box";
 import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
 import Divider from "@mui/joy/Divider";
 import Button from "@mui/joy/Button";
 import CircularProgress from "@mui/joy/CircularProgress";
 import Alert from "@mui/joy/Alert";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
 
-function Row(props) {
-  const { row, onActionClick } = props;
-  const [open, setOpen] = React.useState(props.initialOpen || false);
-  const {token} = useAuthStore()
+function formatNaira(amount) {
+  const num = typeof amount === "number" ? amount : Number(amount ?? 0);
+  return `₦${millify(num, { precision: 2, locales: "ng-NG" })}`;
+}
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "warning";
-      case "Active":
-        return "success";
-      case "Overdue":
-        return "danger";
-      default:
-        return "neutral";
-    }
-  };
-console.log({row})
+function formatDate(dateString) {
+  if (!dateString) return "—";
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-NG", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function FeeDetailsModal({ open, fee, onClose, onPay, onReceipt, isPaying }) {
+  if (!fee) return null;
+
+  const titleId = "fee-details-title";
+  const descId = "fee-details-desc";
+
   return (
-    <React.Fragment>
-      <tr className={row.isPaid ? "paid-row" : "unpaid-row"}>
-        <td>
-          <IconButton
-            aria-label="expand row"
-            variant="plain"
-            color="neutral"
-            size="sm"
-            onClick={() => setOpen(!open)}
-            sx={{ 
-              borderRadius: '50%',
-              transition: 'all 0.2s',
-            }}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </td>
-        <th scope="row">
-          <Typography>{row.name}</Typography>
-        </th>
-        <td>
-          <Typography>
-            ₦{millify(row.amount, {
-              precision: 2,
-              locales: "ng-NG",
-            })}
+    <Modal open={open} onClose={onClose}>
+      <ModalDialog
+        aria-labelledby={titleId}
+        aria-describedby={descId}
+        variant="outlined"
+        sx={{
+          width: { xs: "100%", sm: 720 },
+          maxWidth: "calc(100vw - 32px)",
+          p: { xs: 2, sm: 3 },
+          borderRadius: "lg",
+          boxShadow: "lg",
+          overflow: "auto",
+          maxHeight: "calc(100vh - 48px)",
+        }}
+      >
+        <ModalClose onClick={onClose} sx={{ "--IconButton-size": "40px" }} />
+
+        <Stack spacing={1.25} sx={{ pr: 5 }}>
+          <Typography id={titleId} level="h4" component="h2" sx={{ fontWeight: 700 }}>
+            {fee.name}
           </Typography>
-        </td>
-        <td>
-          <Typography>
-            {new Date(row.dueDate).toLocaleDateString('en-NG', {
-              year: 'numeric',
-              month: 'short', 
-              day: 'numeric'
-            })}
+          <Typography id={descId} level="body-sm" textColor="text.secondary">
+            Review the full breakdown and continue with the appropriate action.
           </Typography>
-        </td>
-        <td>
-          <Chip
+        </Stack>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          useFlexGap
+          sx={{ mb: 2, flexWrap: "wrap" }}
+        >
+          <Card variant="soft" color="neutral" sx={{ flex: 1, minWidth: 220 }}>
+            <Typography level="body-xs" textColor="text.secondary">
+              Total amount
+            </Typography>
+            <Typography level="title-lg" sx={{ mt: 0.5 }}>
+              {formatNaira(fee.amount)}
+            </Typography>
+          </Card>
+
+          <Card variant="soft" color="neutral" sx={{ flex: 1, minWidth: 220 }}>
+            <Typography level="body-xs" textColor="text.secondary">
+              Due date
+            </Typography>
+            <Typography level="title-lg" sx={{ mt: 0.5 }}>
+              {formatDate(fee.dueDate)}
+            </Typography>
+          </Card>
+
+          <Card
             variant="soft"
-            size="sm"
-            color={row.isPaid ? "success" : "warning"}
-            sx={{ 
-              minWidth: '70px',
-              justifyContent: 'center' 
-            }}
+            color={fee.isPaid ? "success" : "warning"}
+            sx={{ flex: 1, minWidth: 220 }}
           >
-            {row.isPaid ? "Paid" : "Not Paid"}
-          </Chip>
-        </td>
-        <td>
-          {row.isPaid ? (
+            <Typography level="body-xs" textColor="text.secondary">
+              Status
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.75 }}>
+              <Chip
+                variant="solid"
+                size="sm"
+                color={fee.isPaid ? "success" : "warning"}
+                sx={{ minWidth: 90, justifyContent: "center" }}
+              >
+                {fee.isPaid ? "Paid" : "Not paid"}
+              </Chip>
+              <Typography level="body-sm" textColor="text.secondary">
+                {fee.isPaid ? "Receipt available" : "Payment required"}
+              </Typography>
+            </Stack>
+          </Card>
+        </Stack>
+
+        <Typography level="title-sm" sx={{ mb: 1 }}>
+          Fee items
+        </Typography>
+
+        <Table
+          borderAxis="xBetween"
+          size="sm"
+          aria-label="fee items"
+          sx={{
+            "--TableCell-paddingX": "0.75rem",
+            "--TableCell-paddingY": "0.5rem",
+            borderRadius: "sm",
+            overflow: "hidden",
+            "& thead th": {
+              fontWeight: "md",
+              backgroundColor: "var(--joy-palette-neutral-50)",
+              borderBottom: "1px solid var(--joy-palette-neutral-200)",
+            },
+          }}
+        >
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th style={{ textAlign: "center" }}>Qty</th>
+              <th style={{ textAlign: "right" }}>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(Array.isArray(fee.items) ? fee.items : []).map((item, idx) => (
+              <tr key={idx}>
+                <th scope="row">{item?.name ?? "—"}</th>
+                <td style={{ textAlign: "center" }}>{item?.quantity ?? "—"}</td>
+                <td style={{ textAlign: "right" }}>
+                  {Number(item?.price ?? 0).toLocaleString("en-NG")}
+                </td>
+              </tr>
+            ))}
+            <tr>
+              <th scope="row" colSpan={2}>
+                Total
+              </th>
+              <td style={{ textAlign: "right", fontWeight: 600 }}>
+                {Number(fee.amount ?? 0).toLocaleString("en-NG")}
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+          <Button variant="plain" color="neutral" onClick={onClose}>
+            Close
+          </Button>
+          {fee.isPaid ? (
             <Button
               startDecorator={<ReceiptIcon />}
-              variant="outlined"
-              size="sm"
+              variant="solid"
               color="neutral"
-              onClick={() => {
-                window.location.href = `${configs.baseUrl}/api/v1/payment/receipt/${row.userPayment._id}?token=${token}`
-              }}
+              onClick={onReceipt}
+              disabled={!fee?.userPayment?._id}
             >
               Receipt
             </Button>
           ) : (
             <Button
               startDecorator={<PaymentIcon />}
-              variant="soft"
-              size="sm"
+              variant="solid"
               color="primary"
-              onClick={() => {
-                onActionClick(row._id);
-              }}
+              onClick={onPay}
+              loading={isPaying}
             >
-              Pay Now
+              Pay
             </Button>
           )}
-        </td>
-      </tr>
-      <tr>
-        <td style={{ height: 0, padding: 0 }} colSpan={6}>
-          {open && (
-            <Card
-              variant="outlined"
-              sx={{
-                p: 2,
-                m: 1,
-                borderRadius: 'sm',
-                boxShadow: 'xs',
-              }}
-            >
-              <Typography 
-                level="title-sm" 
-                component="div"
-                textAlign="center"
-                sx={{ mb: 1.5 }}
-              >
-                {row.name} Details
-              </Typography>
-              <Divider sx={{ my: 1 }} />
-              
-              <Typography level="body-sm" component="div" sx={{ mb: 1 }}>
-                Fee Items
-              </Typography>
-              
-              <Table
-                borderAxis="xBetween"
-                size="sm"
-                aria-label="fee items"
-                sx={{
-                  '--TableCell-paddingX': '0.75rem',
-                  '--TableCell-paddingY': '0.5rem',
-                  '& thead th': {
-                    fontWeight: 'medium',
-                    borderBottom: '1px solid var(--joy-palette-neutral-200)',
-                  }
-                }}
-              >
-                <thead>
-                  <tr>
-                    <th>Item Name</th>
-                    <th style={{ textAlign: 'center' }}>Quantity</th>
-                    <th style={{ textAlign: 'right' }}>Price (₦)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {row.items.map((item, index) => (
-                    <tr key={index}>
-                      <th scope="row">{item.name}</th>
-                      <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                      <td style={{ textAlign: 'right' }}>{item.price.toLocaleString('en-NG')}</td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <th scope="row" colSpan={2}>Total</th>
-                    <td style={{ textAlign: 'right', fontWeight: 'medium' }}>
-                      {row.amount.toLocaleString('en-NG')}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card>
-          )}
-        </td>
-      </tr>
-    </React.Fragment>
+        </Stack>
+      </ModalDialog>
+    </Modal>
   );
 }
 
-Row.propTypes = {
-  initialOpen: PropTypes.bool,
-  row: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
-    dueDate: PropTypes.string.isRequired,
-    status: PropTypes.string.isRequired,
-    isPaid: PropTypes.bool.isRequired,
-    items: PropTypes.arrayOf(
-      PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        quantity: PropTypes.number.isRequired,
-        price: PropTypes.number.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
-  onActionClick: PropTypes.func.isRequired,
-};
+function FeeCard({ fee, onOpen }) {
+  const due = formatDate(fee?.dueDate);
+  const paid = Boolean(fee?.isPaid);
 
-const rows = [
-  {
-    _id: "1",
-    name: "Tuition Fee",
-    amount: 50000,
-    dueDate: "2024-12-01",
-    status: "Active", // Color-coded based on status
-    isPaid: false,
-    items: [
-      { name: "Books", quantity: 1, price: 5000 },
-      { name: "Lab Equipment", quantity: 2, price: 20000 },
-    ],
-  },
-  {
-    _id: "1",
-    name: "Tuition Fee",
-    amount: 50000,
-    dueDate: "2024-12-01",
-    status: "Active", // Color-coded based on status
-    isPaid: false,
-    items: [
-      { name: "Books", quantity: 1, price: 5000 },
-      { name: "Lab Equipment", quantity: 2, price: 20000 },
-    ],
-  },
-  {
-    _id: "1",
-    name: "Tuition Fee",
-    amount: 50000,
-    dueDate: "2024-12-01",
-    status: "Active", // Color-coded based on status
-    isPaid: false,
-    items: [
-      { name: "Books", quantity: 1, price: 5000 },
-      { name: "Lab Equipment", quantity: 2, price: 20000 },
-    ],
-  },
-];
+  return (
+    <Card
+      variant="outlined"
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      sx={{
+        cursor: "pointer",
+        borderRadius: "lg",
+        transition: "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
+        outline: "none",
+        bgcolor: paid ? "success.softBg" : "background.surface",
+        "&:hover": {
+          transform: "translateY(-1px)",
+          boxShadow: "md",
+          borderColor: paid ? "success.outlinedBorder" : "primary.outlinedBorder",
+        },
+        "&:focus-visible": {
+          boxShadow: "0 0 0 3px var(--joy-palette-primary-softBg)",
+          borderColor: "primary.outlinedBorder",
+        },
+      }}
+    >
+      <CardContent>
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography level="title-md" sx={{ fontWeight: 700 }} noWrap>
+              {fee?.name ?? "Fee"}
+            </Typography>
+            <Typography level="body-sm" textColor="text.secondary" sx={{ mt: 0.25 }}>
+              Due {due}
+            </Typography>
+          </Box>
+          <Chip
+            variant="soft"
+            size="sm"
+            color={paid ? "success" : "warning"}
+            sx={{ minWidth: 92, justifyContent: "center" }}
+          >
+            {paid ? "Paid" : "Not paid"}
+          </Chip>
+        </Stack>
+
+        <Divider sx={{ my: 1.5 }} />
+
+        <Stack direction="row" alignItems="baseline" justifyContent="space-between" spacing={2}>
+          <Box>
+            <Typography level="body-xs" textColor="text.secondary">
+              Amount
+            </Typography>
+            <Typography level="title-lg" sx={{ fontWeight: 800 }}>
+              {formatNaira(fee?.amount)}
+            </Typography>
+          </Box>
+          <Typography level="body-sm" textColor="text.secondary">
+            Click to view details
+          </Typography>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
 const getFees = async () => {
   const response = await fetchService.get("/api/v1/student/me/fees");
   if (!response.ok) {
@@ -261,6 +285,9 @@ const createPayment = async (data) => {
   return response.data;
 };
 export default function Payment() {
+  const { token } = useAuthStore();
+  const [activeFee, setActiveFee] = React.useState(null);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["fees"],
     queryFn: getFees,
@@ -281,95 +308,90 @@ export default function Payment() {
     mutate({ fee: feeId });
   };
 
+  const fees = Array.isArray(data?.data) ? data.data : [];
+
+  const receiptUrl =
+    activeFee?.userPayment?._id && token
+      ? `${configs.baseUrl}/api/v1/payment/receipt/${activeFee.userPayment._id}?token=${token}`
+      : null;
+
   return (
     <Card
       variant="outlined"
       sx={{
-        p: { xs: 1, md: 2 },
-        borderRadius: 'md',
-        boxShadow: 'sm',
-        maxWidth: '1200px',
-        mx: 'auto'
+        p: { xs: 1.5, sm: 2.5 },
+        borderRadius: "lg",
+        boxShadow: "sm",
+        maxWidth: "1100px",
+        mx: "auto",
       }}
     >
-      <Typography level="h5" sx={{ mb: 2 }}>
-        Payment Management
-      </Typography>
-      
-      <Typography level="body-sm" sx={{ mb: 3, color: 'text.secondary' }}>
-        View your fees, make payments, and download receipts
-      </Typography>
-      
+      <Stack spacing={0.75} sx={{ mb: 2 }}>
+        <Typography level="h4" sx={{ fontWeight: 800 }}>
+          Fees
+        </Typography>
+        <Typography level="body-sm" textColor="text.secondary">
+          View fee details, make payments, and download receipts.
+        </Typography>
+      </Stack>
+
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress size="md" />
         </Box>
       ) : error ? (
-        <Alert color="danger" sx={{ mb: 2 }}>
-          {error.message || "An error occurred while fetching your payment information"}
+        <Alert color="danger" variant="soft" sx={{ mb: 2 }}>
+          {error.message || "An error occurred while fetching your fee information"}
         </Alert>
-      ) : data?.data?.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography level="body-md">No payment information available</Typography>
-        </Box>
-      ) : (
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table
-            aria-label="fees table"
-            sx={{
-              '--TableCell-paddingX': { xs: '0.5rem', md: '0.75rem' },
-              '--TableCell-paddingY': { xs: '0.5rem', md: '0.75rem' },
-              borderRadius: 'sm',
-              overflow: 'hidden',
-              '& th:not(:first-of-type)': {  // Apply background to all headers EXCEPT the first one
-                backgroundColor: 'var(--joy-palette-neutral-50)',
-                fontWeight: 'medium',
-              },
-              '& thead tr': {
-                borderBottom: '1px solid var(--joy-palette-neutral-200)',
-              },
-              '& tbody tr:hover': {
-                backgroundColor: 'var(--joy-palette-neutral-50)',
-              },
-              '& .paid-row': {
-                backgroundColor: 'var(--joy-palette-success-50)',
-                opacity: 0.9,
-              },
-              '& .unpaid-row': {
-                backgroundColor: 'white',
-              },
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ width: 48 }} aria-label="expand" />
-                <th>Fee Name</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data?.data?.map((row, index) => (
-                <Row
-                  key={row._id}
-                  row={row}
-                  onActionClick={handleActionClick}
-                />
-              ))}
-            </tbody>
-          </Table>
-        </Box>
-      )}
-      
-      {data?.data?.length > 0 && (
-        <Box sx={{ mt: 3, p: 1.5, borderRadius: 'sm', bgcolor: 'neutral.50' }}>
-          <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
-            Pay your fees on time to avoid late payment penalties. For any payment issues, please contact the finance department.
+      ) : fees.length === 0 ? (
+        <Card variant="soft" color="neutral" sx={{ textAlign: "center", py: 6, borderRadius: "lg" }}>
+          <Typography level="title-md" sx={{ fontWeight: 700 }}>
+            No fees available
           </Typography>
+          <Typography level="body-sm" textColor="text.secondary" sx={{ mt: 0.5 }}>
+            If you believe this is a mistake, please contact the finance department.
+          </Typography>
+        </Card>
+      ) : (
+        <Box
+          role="list"
+          aria-label="Fees list"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+            gap: { xs: 1.25, sm: 1.5 },
+          }}
+        >
+          {fees.map((fee) => (
+            <Box key={fee?._id} role="listitem">
+              <FeeCard fee={fee} onOpen={() => setActiveFee(fee)} />
+            </Box>
+          ))}
         </Box>
       )}
+
+      {fees.length > 0 && (
+        <Card variant="soft" color="neutral" sx={{ mt: 2, p: 1.75, borderRadius: "lg" }}>
+          <Typography level="body-xs" textColor="text.secondary">
+            Pay your fees on time to avoid late payment penalties. For payment issues, contact the finance department.
+          </Typography>
+        </Card>
+      )}
+
+      <FeeDetailsModal
+        open={Boolean(activeFee)}
+        fee={activeFee}
+        isPaying={isPending}
+        onClose={() => setActiveFee(null)}
+        onPay={() => {
+          if (!activeFee?._id) return;
+          handleActionClick(activeFee._id);
+        }}
+        onReceipt={() => {
+          if (!receiptUrl) return;
+          window.location.href = receiptUrl;
+        }}
+      />
     </Card>
   );
 }

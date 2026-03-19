@@ -76,6 +76,7 @@ export default function DashboardLayout({ children }) {
       >
         {nav_list.map((item) => (
           <Button
+            key={item.path}
             variant="plain"
             color="neutral"
             aria-pressed={item.path === pathname}

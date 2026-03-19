@@ -34,7 +34,12 @@ export default function Navigation() {
           }}
         >
           {nav_list.map((item) => (
-            <ListItem style={{textDecoration:"none"}}  component={RouterLink} href={item.path}>
+            <ListItem
+              key={item.path}
+              style={{ textDecoration: "none" }}
+              component={RouterLink}
+              href={item.path}
+            >
               <ListItemButton selected={pathname == item.path}>
                 <ListItemDecorator>
                   {item.icon}
