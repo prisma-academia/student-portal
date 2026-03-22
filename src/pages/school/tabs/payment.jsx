@@ -312,7 +312,7 @@ export default function Payment() {
 
   const receiptUrl =
     (activeFee?.userPayment?._id ?? activeFee?.studentPayment?._id) && token
-      ? `${configs.baseUrl}/api/v1/payment/receipt/${activeFee.userPayment?._id ?? activeFee.studentPayment._id}?token=${token}`
+      ? `${configs.baseUrl}/api/v1/student/me/receipt/${activeFee.userPayment?._id ?? activeFee.studentPayment._id}?token=${token}`
       : null;
 
   return (
