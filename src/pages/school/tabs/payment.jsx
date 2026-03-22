@@ -20,6 +20,7 @@ import Alert from "@mui/joy/Alert";
 import Modal from "@mui/joy/Modal";
 import ModalClose from "@mui/joy/ModalClose";
 import ModalDialog from "@mui/joy/ModalDialog";
+import CourseFormSemesters from "./course-form-semesters";
 
 function formatNaira(amount) {
   const num = typeof amount === "number" ? amount : Number(amount ?? 0);
@@ -316,14 +317,19 @@ export default function Payment() {
       : null;
 
   return (
+    <Stack
+      spacing={2}
+      sx={{
+        maxWidth: "1100px",
+        mx: "auto",
+      }}
+    >
     <Card
       variant="outlined"
       sx={{
         p: { xs: 1.5, sm: 2.5 },
         borderRadius: "lg",
         boxShadow: "sm",
-        maxWidth: "1100px",
-        mx: "auto",
       }}
     >
       <Stack spacing={0.75} sx={{ mb: 2 }}>
@@ -393,5 +399,7 @@ export default function Payment() {
         }}
       />
     </Card>
+    <CourseFormSemesters />
+    </Stack>
   );
 }
