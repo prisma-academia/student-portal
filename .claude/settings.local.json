@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\umarj\\\\node\\\\prisma-academia\\\\student-portal\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(xargs ls -lh)",
+      "Bash(npm run *)"
+    ]
+  }
+}

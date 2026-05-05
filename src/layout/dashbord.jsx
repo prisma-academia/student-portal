@@ -1,32 +1,19 @@
 import * as React from "react";
 import { CssVarsProvider } from "@mui/joy/styles";
-import { FocusTrap } from "@mui/base/FocusTrap";
 import CssBaseline from "@mui/joy/CssBaseline";
 import Box from "@mui/joy/Box";
-import Typography from "@mui/joy/Typography";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
 
-import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
-import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
-import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
-import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
-
-import { Calendar } from "@fullcalendar/core";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import listPlugin from "@fullcalendar/list";
 import Layout from "./Layout";
 import Header from "./Header";
 import Navigation from "./Navigation";
 import useNavConfig from "./nav-list";
 import { usePathname } from "../component/use-pathname";
 import RouterLink from "../component/router-link";
-import { Breadcrumbs, Divider } from "@mui/joy";
 import { useAuthStore } from "../store";
-import { Link, Navigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import configs from "../configs";
+import { Navigate } from "react-router-dom";
+import { theme } from "../themes";
 
 export default function DashboardLayout({ children }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -37,26 +24,17 @@ export default function DashboardLayout({ children }) {
   if (!isAuth) {
     return <Navigate to={"/auth/sign-in"} />;
   }
-  // const socket = io(configs.baseUrl);
-  // socket.on("connect", () => {
-  //   console.log("Connected to the socket server");
-  //   socket.emit("register", isAuth.email);
-  // });
-  // socket.on("message", (msg) => {
-  //   console.log(`message from server ${msg}`);
-  // });
-  // socket.on("private_message", (msg) => {
-  //   console.log(`private_message from server ${msg}`);
-  // });
 
   return (
-    <CssVarsProvider disableTransitionOnChange>
+    <CssVarsProvider theme={theme} disableTransitionOnChange>
       <CssBaseline />
       {drawerOpen && (
         <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
           <Navigation />
         </Layout.SideDrawer>
       )}
+
+      {/* Mobile bottom tab bar */}
       <Stack
         id="tab-bar"
         direction="row"
@@ -64,58 +42,59 @@ export default function DashboardLayout({ children }) {
         spacing={1}
         sx={{
           display: { xs: "flex", sm: "none" },
-          zIndex: "999",
+          zIndex: 999,
           bottom: 0,
           position: "fixed",
           width: "100dvw",
-          py: 2,
-          backgroundColor: "background.body",
+          py: 1.5,
+          backgroundColor: "background.surface",
           borderTop: "1px solid",
           borderColor: "divider",
+          boxShadow: "0 -2px 8px rgba(0,0,0,0.06)",
         }}
       >
         {nav_list.map((item) => (
           <Button
             key={item.path}
-            variant="plain"
-            color="neutral"
+            variant={item.path === pathname ? "soft" : "plain"}
+            color={item.path === pathname ? "primary" : "neutral"}
             aria-pressed={item.path === pathname}
             component={RouterLink}
             href={item.path}
             size="sm"
             startDecorator={item.icon}
-            sx={{ flexDirection: "column", "--Button-gap": 0 }}
+            sx={{
+              flexDirection: "column",
+              "--Button-gap": 0,
+              fontSize: "0.65rem",
+              borderRadius: "lg",
+              px: 2,
+            }}
           >
             {item.title}
           </Button>
         ))}
       </Stack>
+
       <Layout.Root
         sx={{
-          ...(drawerOpen && {
-            height: "100vh",
-            overflow: "hidden",
-          }),
+          ...(drawerOpen && { height: "100vh", overflow: "hidden" }),
         }}
       >
         <Layout.Header>
-          <Header />
+          <Header onMenuClick={() => setDrawerOpen(true)} />
         </Layout.Header>
         <Layout.SideNav>
           <Navigation />
         </Layout.SideNav>
-        <Box>
-          {/* <Breadcrumbs  size="sm" separator=">">
-            <Link>Home</Link>
-            <Link>Second</Link>
-          </Breadcrumbs> */}
-          {/* <Typography
-            level="title-lg"
-            textColor="var(--joy-palette-success-plainColor)"
-          >
-            Label
-          </Typography>
-          <Divider sx={{ m: 2 }} /> */}
+        <Box
+          sx={{
+            p: { xs: 2, sm: 3 },
+            pb: { xs: 10, sm: 3 },
+            minHeight: 0,
+            overflow: "auto",
+          }}
+        >
           {children}
         </Box>
       </Layout.Root>

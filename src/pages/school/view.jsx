@@ -22,6 +22,10 @@ function CustomTabList({ tabs, ...props }) {
     <TabList
       sx={{
         pt: 1,
+        overflowX: "auto",
+        flexWrap: "nowrap",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
         justifyContent: "flex-start",
         [`&& .${tabClasses.root}`]: {
           flex: "initial",

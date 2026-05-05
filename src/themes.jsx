@@ -46,4 +46,5 @@ function ThemesProvider({ children }) {
   );
 }
 
+export { theme };
 export default ThemesProvider;

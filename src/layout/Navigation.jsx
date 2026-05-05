@@ -6,7 +6,6 @@ import ListItemButton from "@mui/joy/ListItemButton";
 import ListItemDecorator from "@mui/joy/ListItemDecorator";
 import ListItemContent from "@mui/joy/ListItemContent";
 
-
 import useNavConfig from "./nav-list";
 import { usePathname } from "../component/use-pathname";
 import RouterLink from "../component/router-link";
@@ -20,7 +19,6 @@ export default function Navigation() {
       sx={{
         "--ListItem-radius": "var(--joy-radius-sm)",
         "--List-gap": "4px",
-        position: "fixed",
       }}
     >
       <ListItem nested>
@@ -40,11 +38,21 @@ export default function Navigation() {
               component={RouterLink}
               href={item.path}
             >
-              <ListItemButton selected={pathname == item.path}>
+              <ListItemButton
+                selected={pathname === item.path}
+                sx={{
+                  "&.Mui-selected": {
+                    color: "primary.plainColor",
+                    "& .MuiSvgIcon-root": { color: "primary.500" },
+                  },
+                }}
+              >
                 <ListItemDecorator>
                   {item.icon}
                 </ListItemDecorator>
-                <ListItemContent sx={{textTransform:"capitalize", width:120}}>{item.title}</ListItemContent>
+                <ListItemContent sx={{ textTransform: "capitalize", width: 120 }}>
+                  {item.title}
+                </ListItemContent>
               </ListItemButton>
             </ListItem>
           ))}

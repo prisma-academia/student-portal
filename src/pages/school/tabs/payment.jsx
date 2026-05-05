@@ -20,8 +20,6 @@ import Alert from "@mui/joy/Alert";
 import Modal from "@mui/joy/Modal";
 import ModalClose from "@mui/joy/ModalClose";
 import ModalDialog from "@mui/joy/ModalDialog";
-import CourseFormSemesters from "./course-form-semesters";
-
 function formatNaira(amount) {
   const num = typeof amount === "number" ? amount : Number(amount ?? 0);
   return `₦${millify(num, { precision: 2, locales: "ng-NG" })}`;
@@ -399,7 +397,6 @@ export default function Payment() {
         }}
       />
     </Card>
-    <CourseFormSemesters />
     </Stack>
   );
 }
