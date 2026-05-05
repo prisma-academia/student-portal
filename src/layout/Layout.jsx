@@ -11,8 +11,8 @@ function Root(props) {
           display: 'grid',
           gridTemplateColumns: {
             xs: '1fr',
-            sm: 'minmax(200px, 220px) minmax(450px, 1fr)',
-            // md: 'minmax(160px, 300px) minmax(300px, 500px) minmax(500px, 1fr)',
+            sm: '64px 1fr',
+            md: 'minmax(200px, 220px) 1fr',
           },
           gridTemplateRows: '64px 1fr',
           minHeight: '100vh',
@@ -31,8 +31,9 @@ function Header(props) {
       {...props}
       sx={[
         {
-          p: 2,
-          gap: 2,
+          px: { xs: 1.5, sm: 2 },
+          py: 0,
+          gap: 1,
           bgcolor: 'background.surface',
           display: 'flex',
           flexDirection: 'row',
@@ -44,6 +45,7 @@ function Header(props) {
           position: 'sticky',
           top: 0,
           zIndex: 1100,
+          height: 64,
         },
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
@@ -59,7 +61,7 @@ function SideNav(props) {
       {...props}
       sx={[
         {
-          p: 2,
+          p: { sm: 1, md: 2 },
           bgcolor: 'background.surface',
           borderRight: '1px solid',
           borderColor: 'divider',
@@ -68,6 +70,7 @@ function SideNav(props) {
             sm: 'initial',
           },
           overflowY: 'auto',
+          overflowX: 'hidden',
         },
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
@@ -124,17 +127,21 @@ function SideDrawer(props) {
           position: 'absolute',
           inset: 0,
           bgcolor: (theme) =>
-            `rgba(${theme.vars.palette.neutral.darkChannel} / 0.8)`,
+            `rgba(${theme.vars.palette.neutral.darkChannel} / 0.6)`,
+          backdropFilter: 'blur(2px)',
         }}
       />
       <Sheet
         sx={{
-          minWidth: 256,
+          minWidth: 260,
           width: 'max-content',
+          maxWidth: '80vw',
           height: '100%',
-          p: 2,
-          boxShadow: 'lg',
+          p: 0,
+          boxShadow: 'xl',
           bgcolor: 'background.surface',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {props.children}

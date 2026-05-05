@@ -4,6 +4,10 @@ import CssBaseline from "@mui/joy/CssBaseline";
 import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
+import Divider from "@mui/joy/Divider";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import Layout from "./Layout";
 import Header from "./Header";
@@ -14,6 +18,8 @@ import RouterLink from "../component/router-link";
 import { useAuthStore } from "../store";
 import { Navigate } from "react-router-dom";
 import { theme } from "../themes";
+import Logo from "../component/logo";
+import configs from "../configs";
 
 export default function DashboardLayout({ children }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -28,9 +34,48 @@ export default function DashboardLayout({ children }) {
   return (
     <CssVarsProvider theme={theme} disableTransitionOnChange>
       <CssBaseline />
+
+      {/* Mobile drawer */}
       {drawerOpen && (
         <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
-          <Navigation />
+          {/* Drawer header */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              px: 2,
+              py: 1.5,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              flexShrink: 0,
+            }}
+          >
+            <IconButton
+              size="sm"
+              variant="outlined"
+              color="neutral"
+              sx={{ borderRadius: "50%", flexShrink: 0 }}
+            >
+              <Logo />
+            </IconButton>
+            <Typography level="title-sm" fontWeight={700} sx={{ flex: 1 }}>
+              {configs.branding.appShortName}
+            </Typography>
+            <IconButton
+              size="sm"
+              variant="plain"
+              color="neutral"
+              onClick={() => setDrawerOpen(false)}
+            >
+              <CloseRoundedIcon />
+            </IconButton>
+          </Box>
+
+          {/* Drawer nav */}
+          <Box sx={{ flex: 1, overflow: "auto", pt: 1 }}>
+            <Navigation drawer />
+          </Box>
         </Layout.SideDrawer>
       )}
 
@@ -39,41 +84,47 @@ export default function DashboardLayout({ children }) {
         id="tab-bar"
         direction="row"
         justifyContent="space-around"
-        spacing={1}
         sx={{
           display: { xs: "flex", sm: "none" },
           zIndex: 999,
           bottom: 0,
           position: "fixed",
           width: "100dvw",
-          py: 1.5,
+          pt: 1,
+          pb: "calc(env(safe-area-inset-bottom, 0px) + 8px)",
           backgroundColor: "background.surface",
           borderTop: "1px solid",
           borderColor: "divider",
-          boxShadow: "0 -2px 8px rgba(0,0,0,0.06)",
+          boxShadow: "0 -2px 12px rgba(0,0,0,0.08)",
         }}
       >
-        {nav_list.map((item) => (
-          <Button
-            key={item.path}
-            variant={item.path === pathname ? "soft" : "plain"}
-            color={item.path === pathname ? "primary" : "neutral"}
-            aria-pressed={item.path === pathname}
-            component={RouterLink}
-            href={item.path}
-            size="sm"
-            startDecorator={item.icon}
-            sx={{
-              flexDirection: "column",
-              "--Button-gap": 0,
-              fontSize: "0.65rem",
-              borderRadius: "lg",
-              px: 2,
-            }}
-          >
-            {item.title}
-          </Button>
-        ))}
+        {nav_list.map((item) => {
+          const isActive = item.path === pathname;
+          return (
+            <Button
+              key={item.path}
+              variant={isActive ? "soft" : "plain"}
+              color={isActive ? "primary" : "neutral"}
+              aria-pressed={isActive}
+              component={RouterLink}
+              href={item.path}
+              size="sm"
+              startDecorator={item.icon}
+              sx={{
+                flexDirection: "column",
+                "--Button-gap": 0,
+                fontSize: "0.625rem",
+                fontWeight: isActive ? 700 : 500,
+                borderRadius: "lg",
+                px: 2.5,
+                py: 0.75,
+                minWidth: 64,
+              }}
+            >
+              {item.title}
+            </Button>
+          );
+        })}
       </Stack>
 
       <Layout.Root
@@ -89,8 +140,11 @@ export default function DashboardLayout({ children }) {
         </Layout.SideNav>
         <Box
           sx={{
-            p: { xs: 2, sm: 3 },
-            pb: { xs: 10, sm: 3 },
+            p: { xs: 2, sm: 2, md: 3 },
+            pb: {
+              xs: "calc(env(safe-area-inset-bottom, 0px) + 80px)",
+              sm: 3,
+            },
             minHeight: 0,
             overflow: "auto",
           }}
