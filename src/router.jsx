@@ -9,6 +9,7 @@ const SignIn = lazy(() => import("./pages/auth/login"));
 const Setup = lazy(() => import("./pages/auth/setup"));
 const Home = lazy(() => import("./pages/home/view"));
 const Timeline = lazy(() => import("./pages/school/view"));
+const PaymentStatus = lazy(() => import("./pages/payment/status"));
 const Resource = lazy(() => import("./pages/resource/view"));
 const Profile = lazy(() => import("./pages/profile/view"));
 const DashboardLayout = lazy(() => import("./layout/dashbord"));
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: "/school",
         element: <Timeline />,
+      },
+      {
+        path: "/payment/status",
+        element: <PaymentStatus />,
       },
       {
         path: "/resource",

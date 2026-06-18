@@ -4,6 +4,7 @@ import Tabs from "@mui/joy/Tabs";
 import TabList from "@mui/joy/TabList";
 import Tab, { tabClasses } from "@mui/joy/Tab";
 import TabPanel from "@mui/joy/TabPanel";
+import { useSearchParams } from "react-router-dom";
 import YearTable from "./tabs/session"
 import Payment from "./tabs/payment";
 import Result from "./tabs/result";
@@ -72,7 +73,16 @@ function TabPanelContainer({ children }) {
 }
 
 export default function School() {
-  const [index, setIndex] = React.useState(0);
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialIndex = tabParam === "payment" ? 1 : tabParam === "result" ? 2 : 0;
+  const [index, setIndex] = React.useState(initialIndex);
+
+  React.useEffect(() => {
+    if (tabParam === "payment") setIndex(1);
+    else if (tabParam === "result") setIndex(2);
+    else if (tabParam === "session") setIndex(0);
+  }, [tabParam]);
 
   return (
     <Box
