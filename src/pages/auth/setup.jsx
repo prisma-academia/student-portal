@@ -39,12 +39,9 @@ function SetupScreen() {
     }
   }, [student, navigate, setAlert]);
 
-  const postData = async (payload) => {
-    const { useFormData, formData, jsonBody } = payload;
+  const postData = async ({ formData }) => {
     const endpoint = "/api/v1/student/setup";
-    const response = useFormData
-      ? await fetchService.postPublicFormData(endpoint, formData)
-      : await fetchService.postPublic(endpoint, jsonBody);
+    const response = await fetchService.postPublicFormData(endpoint, formData);
     if (!response.ok) {
       throw new Error(response.message);
     }
@@ -92,27 +89,20 @@ function SetupScreen() {
       setAlert({ message: "Date of birth is required.", variant: "danger" });
       return;
     }
-
-    const jsonBody = {
-      ...(email && { email }),
-      ...(regNumber && { regNumber }),
-      currentPassword: passwords.currentPassword,
-      newPassword: passwords.newPassword,
-      dateOfBirth,
-    };
-
-    if (selectedFile) {
-      const formData = new FormData();
-      if (email) formData.append("email", email);
-      if (regNumber) formData.append("regNumber", regNumber);
-      formData.append("currentPassword", passwords.currentPassword);
-      formData.append("newPassword", passwords.newPassword);
-      formData.append("dateOfBirth", dateOfBirth);
-      formData.append("picture", selectedFile);
-      mutation.mutate({ useFormData: true, formData });
-    } else {
-      mutation.mutate({ useFormData: false, jsonBody });
+    if (!selectedFile) {
+      setAlert({ message: "A profile picture is required.", variant: "danger" });
+      return;
     }
+
+    // The picture is required, so setup is always multipart.
+    const formData = new FormData();
+    if (email) formData.append("email", email);
+    if (regNumber) formData.append("regNumber", regNumber);
+    formData.append("currentPassword", passwords.currentPassword);
+    formData.append("newPassword", passwords.newPassword);
+    formData.append("dateOfBirth", dateOfBirth);
+    formData.append("picture", selectedFile);
+    mutation.mutate({ formData });
   };
 
   if (!student) return null;
@@ -128,7 +118,7 @@ function SetupScreen() {
       <form onSubmit={handleSubmit}>
         <Stack gap={4} sx={{ mt: 2 }}>
           <FormControl>
-            <FormLabel>Profile Picture (optional)</FormLabel>
+            <FormLabel>Profile Picture (required)</FormLabel>
             <Box
               sx={{
                 width: 150,
