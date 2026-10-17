@@ -1,50 +1,32 @@
 /**
- * Single source for all environment configuration.
- * All values come from VITE_* env; no fallbacks. Throws on missing required vars.
+ * Single source for environment configuration.
+ *
+ * Only four values differ between schools and are required:
+ *   VITE_API_BASE_URL, VITE_APP_NAME, VITE_LOGO_URL, VITE_PRIMARY_COLOR
+ * Everything else (short name, page title, logo alt, footer, theme colours,
+ * calendar colours, auth background) is derived from them.
  */
 
 const env = typeof import.meta !== "undefined" && import.meta.env ? import.meta.env : {};
 
-const REQUIRED = [
-  "VITE_API_BASE_URL",
-  "VITE_APP_NAME",
-  "VITE_APP_SHORT_NAME",
-  "VITE_PAGE_TITLE",
-  "VITE_LOGO_URL",
-  "VITE_LOGO_ALT",
-  "VITE_FAVICON_PATH",
-  "VITE_PRIMARY_COLOR",
-  "VITE_THEME_COLOR",
-  "VITE_MANIFEST_BG_COLOR",
-  "VITE_AUTH_BACKGROUND_URL",
-  "VITE_AUTH_BACKGROUND_URL_DARK",
-  "VITE_FOOTER_TEXT",
-  "VITE_CALENDAR_DEPARTMENT_BG",
-  "VITE_CALENDAR_DEPARTMENT_HOVER",
-  "VITE_CALENDAR_CLASS_BG",
-  "VITE_CALENDAR_CLASS_HOVER",
-  "VITE_CALENDAR_GENERAL_BG",
-  "VITE_CALENDAR_GENERAL_HOVER",
-];
+const REQUIRED = ["VITE_API_BASE_URL", "VITE_APP_NAME", "VITE_LOGO_URL", "VITE_PRIMARY_COLOR"];
 
-function requireEnv(keys) {
-  const missing = keys.filter((key) => env[key] == null || String(env[key]).trim() === "");
-  if (missing.length) {
-    throw new Error(
-      `[configs] Missing required env: ${missing.join(", ")}. Set them in .env (see .env.example).`
-    );
-  }
-}
+const read = (key) => String(env[key] ?? "").trim().replace(/^["']|["']$/g, "");
 
-requireEnv(REQUIRED);
-
-if (!/^#[0-9A-Fa-f]{6}$/.test(env.VITE_PRIMARY_COLOR)) {
+const missing = REQUIRED.filter((key) => read(key) === "");
+if (missing.length) {
   throw new Error(
-    `[configs] VITE_PRIMARY_COLOR must be a 6-digit hex (e.g. #f44336), got: ${env.VITE_PRIMARY_COLOR}`
+    `[configs] Missing required env: ${missing.join(", ")}. Set them in .env or your host's environment settings (see .env.example).`
   );
 }
 
-const primary = env.VITE_PRIMARY_COLOR;
+const primary = read("VITE_PRIMARY_COLOR");
+if (!/^#[0-9A-Fa-f]{6}$/.test(primary)) {
+  throw new Error(`[configs] VITE_PRIMARY_COLOR must be a 6-digit hex (e.g. #f44336), got: ${primary}`);
+}
+
+const appName = read("VITE_APP_NAME");
+
 const primaryPalette = {
   50: primary,
   100: primary,
@@ -58,35 +40,28 @@ const primaryPalette = {
   900: primary,
 };
 
+// Auth side panel: a soft wash of the school colour (no image env needed).
+const authBackground = `radial-gradient(120% 90% at 20% 10%, ${primary}55, transparent 60%), radial-gradient(90% 80% at 90% 90%, ${primary}33, transparent 55%)`;
+
 const configs = {
-  baseUrl: env.VITE_API_BASE_URL,
+  baseUrl: read("VITE_API_BASE_URL").replace(/\/$/, ""),
 
   branding: {
-    appName: env.VITE_APP_NAME,
-    appShortName: env.VITE_APP_SHORT_NAME,
-    pageTitle: env.VITE_PAGE_TITLE,
-    logoUrl: env.VITE_LOGO_URL,
-    logoAlt: env.VITE_LOGO_ALT,
-    faviconPath: env.VITE_FAVICON_PATH,
+    appName,
+    appShortName: appName,
+    pageTitle: appName,
+    logoUrl: read("VITE_LOGO_URL"),
+    logoAlt: `${appName} logo`,
     primaryPalette,
-    themeColor: env.VITE_THEME_COLOR,
-    backgroundColor: env.VITE_MANIFEST_BG_COLOR,
-    authBackgroundImageUrl: env.VITE_AUTH_BACKGROUND_URL,
-    authBackgroundImageUrlDark: env.VITE_AUTH_BACKGROUND_URL_DARK,
-    footerText: env.VITE_FOOTER_TEXT,
+    themeColor: primary,
+    backgroundColor: "#ffffff",
+    authBackground,
+    authBackgroundDark: authBackground,
+    footerText: `© {year} ${appName}`,
     calendarCategoryColors: {
-      department: {
-        bg: env.VITE_CALENDAR_DEPARTMENT_BG,
-        hover: env.VITE_CALENDAR_DEPARTMENT_HOVER,
-      },
-      class: {
-        bg: env.VITE_CALENDAR_CLASS_BG,
-        hover: env.VITE_CALENDAR_CLASS_HOVER,
-      },
-      general: {
-        bg: env.VITE_CALENDAR_GENERAL_BG,
-        hover: env.VITE_CALENDAR_GENERAL_HOVER,
-      },
+      department: { bg: "rgb(248, 157, 157)", hover: "rgb(252, 176, 176)" },
+      class: { bg: "rgb(190, 248, 157)", hover: "rgb(204, 250, 177)" },
+      general: { bg: "rgb(157, 195, 248)", hover: "rgb(138, 182, 245)" },
     },
   },
 };

@@ -115,9 +115,9 @@ export default function AuthLayout({children}) {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          backgroundImage: `url(${configs.branding.authBackgroundImageUrl})`,
+          backgroundImage: configs.branding.authBackground,
           [theme.getColorSchemeSelector("dark")]: {
-            backgroundImage: `url(${configs.branding.authBackgroundImageUrlDark})`,
+            backgroundImage: configs.branding.authBackgroundDark,
           },
         })}
       />
