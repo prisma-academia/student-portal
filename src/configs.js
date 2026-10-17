@@ -16,7 +16,7 @@ const read = (key) => String(env[key] ?? "").trim().replace(/^["']|["']$/g, "");
 const missing = REQUIRED.filter((key) => read(key) === "");
 if (missing.length) {
   throw new Error(
-    `[configs] Missing required env: ${missing.join(", ")}. Set them in .env or your host's environment settings (see .env.example).`
+    `[configs] Missing required env: ${missing.join(", ")}. Set them in .env (or .env.<school> with --mode <school>) or in your host's environment settings.`
   );
 }
 
